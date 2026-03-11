@@ -2,62 +2,39 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-st.set_page_config(page_title="Vehicles App", layout="wide")
-
 st.title(" Vehicles Data Explorer")
 
-car_data = pd.read_csv('data/vehicles.csv') # lendo os dados
-hist_button = st.button('Criar histograma') # criar um botão
+# Carregar dados
+df = pd.read_csv("data/vehicles.csv")
 
- #-------       
-if hist_button: # se o botão for clicado
-            # escrever uma mensagem
-            st.write('Criando um histograma para o conjunto de dados de anúncios de vendas de carros')
-            
-            # criar um histograma
-            fig = px.histogram(car_data, x="odometer")
-        
-            # exibir um gráfico Plotly interativo
-            st.plotly_chart(fig, use_container_width=True)
-
- # criar uma caixa de seleção
-build_histogram = st.checkbox('Criar um histograma')
-if build_histogram:
-        # escrever uma mensagem
-            st.write('Criando um histograma para o conjunto de dados de anúncios de vendas de carros')
-            # criar um histograma
-            fig = px.histogram(car_data, x="odometer")
-        
-            # exibir um gráfico Plotly interativo
-            st.plotly_chart(fig, use_container_width=True)
-
-
-
-#--------
-
-
-# Load data
-@st.cache_data
-def load_data():
-    return pd.read_csv("data/vehicles.csv")
-
-df = load_data()
-
-st.subheader("Dataset")
+st.write("### Dataset")
 st.dataframe(df)
 
-# Price distribution
-st.subheader("Distribuição de Preços")
-fig_price = px.histogram(df, x="price", nbins=50, title="Distribuição de Preços")
-st.plotly_chart(fig_price, use_container_width=True)
+st.write("### Escolha os gráficos que deseja visualizar")
 
-# Scatter: price vs odometer
-st.subheader("Preço vs Quilometragem")
-fig_scatter = px.scatter(
-    df,
-    x="odometer",
-    y="price",
-    color="condition",
-    title="Preço vs Quilometragem por Condição"
-)
-st.plotly_chart(fig_scatter, use_container_width=True)
+# Checkbox 1 — Histograma
+if st.checkbox("Mostrar histograma de preços"):
+    fig = px.histogram(df, x="price", nbins=50, title="Distribuição dos Preços")
+    st.plotly_chart(fig)
+
+# Checkbox 2 — Scatter Plot
+if st.checkbox("Mostrar gráfico de dispersão (Preço vs Quilometragem)"):
+    fig = px.scatter(df, x="odometer", y="price",
+                     title="Preço vs Quilometragem",
+                     opacity=0.6)
+    st.plotly_chart(fig)
+
+# Checkbox 3 — Boxplot
+if st.checkbox("Mostrar boxplot por condição"):
+    fig = px.box(df, x="condition", y="price",
+                 title="Preço por Condição do Veículo")
+    st.plotly_chart(fig)
+
+# Checkbox 4 — Bar Chart
+if st.checkbox("Mostrar gráfico de barras (Contagem por tipo de combustível)"):
+    fuel_counts = df["fuel"].value_counts().reset_index()
+    fuel_counts.columns = ["fuel", "count"]
+
+    fig = px.bar(fuel_counts, x="fuel", y="count",
+                 title="Número de Veículos por Tipo de Combustível")
+    st.plotly_chart(fig)
